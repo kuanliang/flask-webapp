@@ -15,3 +15,6 @@ def make_predict():
     # convert our json to a numpy array
     predict_request = [data['sl']]
     predict_request = np.array(predict_request)
+
+
+
