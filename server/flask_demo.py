@@ -4,11 +4,13 @@ from flask import Flask, abort, jsonify, request
 
 import cPickle as pickle
 
-modelCol = pickle.load(open('./model/model_20160718.dump'))
-model = modelCol[0]
-columns = modelCol[1]
+#modelCol = pickle.load(open('./model/model_20160718.dump'))
+#model = modelCol[0]
+#columns = modelCol[1]
 
 # print columns
+
+my_random_forest = pickle.load(open("../iris.dump", "rb"))
 
 app = Flask(__name__)
 
@@ -16,6 +18,23 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return "<h1>Hello World!!</h1>"
+
+
+
+@app.route('/api', methods=['POST'])
+def iris_predict():
+    #if request.method == 'POST':
+    #    return "ECHO: POST\n"
+    
+    data = request.get_json(force=True)
+    
+    
+    
+    predict_request = [data['sl'], data['sw'], data['pl'], data['pw']]
+    predict_request = np.array(predict_request)
+    y_hat = my_random_forest.predict(predict_request)
+    output = [y_hat[0]]
+    return jsonify(results=output), 201
 
 
 @app.route('/hello', methods=['POST'])
@@ -26,7 +45,7 @@ def make():
     "lastName":"Snow",
     "knows":"nothing"}
     """
-
+    
     # get data, xform to a dict of  pandas series
     data = request.get_json(force=True)
 
@@ -56,9 +75,28 @@ def make_predict():
     # return model prediction
     output = [predict[0]]
     return jsonify(results=output)
-    
+
+
+@app.route('/echo', methods = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'])
+def api_echo():
+    if request.method == 'GET':
+        return "ECHO: GET\n"
+
+    elif request.method == 'POST':
+        return "ECHO: POST\n"
+
+    elif request.method == 'PATCH':
+        return "ECHO: PACTH\n"
+
+    elif request.method == 'PUT':
+        return "ECHO: PUT\n"
+
+    elif request.method == 'DELETE':
+        return "ECHO: DELETE"
+
+ 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=9000, debug=True)
 
 
 
